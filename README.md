@@ -74,5 +74,6 @@ https://github.com/SecureSkyTechnology/howto-eclipse-setup の `setup-type1` を
 
 * Ecipseのインストール
 * Clean Up/Formatter 設定
-* 必須プラグイン Lombok
+* 必須プラグイン
+  * Lombok
 * GitでcloneしたMavenプロジェクトのインポート 
