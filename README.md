@@ -35,6 +35,12 @@ client -(msgpack)->[msgpack2json]-(json)->[local HTTP proxy]-(json)->[json2msgpa
 client <-(msgpack)-[msgpack2json]<-(json)-[local HTTP proxy]-(json)<-[json2msgpack]<-(msgpack)- server
 ```
 
+## v1.0.0 での制限
+
+- float(32)フォーマットを送ると、float(64)に変換されてしまいます。
+- intフォーマットのsigned/unsignedの区別は未対応です。
+  - [使用しているライブラリ](https://github.com/msgpack/msgpack-java) の実装依存になります。
+
 ## requirement
 
 * Java8
