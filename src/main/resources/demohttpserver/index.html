@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MessagePackのデモ</title>
+<script src="/jquery-3.2.1.min.js"></script>
+<script src="/msgpack.min.js"></script>
+<script>
+$(document).ready(function() {
+	var spacer = " ";
+	$("#load_pojo_data").click(function() {
+		var xhr = new XMLHttpRequest();
+		xhr.open('GET', '/getpojo', true);
+		xhr.responseType = 'arraybuffer';
+		xhr.onload = function(e) {
+			var responseArray = new Uint8Array(this.response);
+			var buffer = new Uint8Array(responseArray);
+			var data = msgpack.decode(buffer);
+			var json = JSON.stringify(data, null, spacer);
+			$("#inputjson").val(json);
+		};
+		xhr.send();
+	});
+	$("#encode_send").click(function() {
+		var inputjson = $("#inputjson").val();
+		var inputobj = JSON.parse(inputjson);
+		var requestBuffer = msgpack.encode(inputobj);
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '/echoasis', true);
+		xhr.setRequestHeader('Content-Type', 'application/msgpack');
+		xhr.setRequestHeader('Content-Length', requestBuffer.length);
+		xhr.responseType = 'arraybuffer';
+		xhr.onload = function(e) {
+			var responseArray = new Uint8Array(this.response);
+			var buffer = new Uint8Array(responseArray);
+			var data = msgpack.decode(buffer);
+			var json = JSON.stringify(data, null, spacer);
+			$("#echobackjson").val(json);
+		};
+		xhr.send(requestBuffer);
+	});
+});
+</script>
+<style>
+textarea {
+  font-family: monospace;
+}
+</style>
+</head>
+<body>
+<h1>MessagePackのデモ</h1>
+<h2>JavaScript と Java のEncode/Decodeデモ</h2>
+<h5>input json:</h5>
+<input type="button" id="load_pojo_data" value="load sample msgpack data"><br>
+<textarea id="inputjson" rows="20" cols="40"></textarea><br>
+<input type="button" id="encode_send" value="encode input json to msgpack, send to asis endpoint"><br>
+<h5>result</h5>
+<textarea id="echobackjson" rows="20" cols="40"></textarea><br>
+
+<p>各エンドポイントの説明についてはプロジェクトのWikiページを御覧ください。</p>
+</body>
+</html>

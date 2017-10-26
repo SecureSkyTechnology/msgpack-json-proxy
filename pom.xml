@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.secureskytech</groupId>
+  <artifactId>msgpack-json-proxy</artifactId>
+  <version>0.0.2-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <name>msgpack-json-proxy</name>
+  <description>local HTTP proxy converting MessagePack to/from JSON HTTP request/response body.</description>
+  <url>https://github.com/SecureSkyTechnology/msgpack-json-proxy</url>
+
+  <organization>
+    <name>Secure Sky Technology, Inc.</name>
+    <url>https://www.securesky-tech.com/</url>
+  </organization>
+
+  <properties>
+    <!-- see : https://maven.apache.org/general.html#encoding-warning  -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <java.version.source>1.8</java.version.source>
+    <java.version.target>1.8</java.version.target>
+    <java.compiler.debug>true</java.compiler.debug>
+    <exec.mainClass>com.secureskytech.msgpackjsonproxy.Main</exec.mainClass>
+  </properties>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.msgpack</groupId>
+      <artifactId>jackson-dataformat-msgpack</artifactId>
+      <version>0.8.13</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.littleshoot</groupId>
+      <artifactId>littleproxy</artifactId>
+      <version>1.1.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.lightbody.bmp</groupId>
+      <artifactId>mitm</artifactId>
+      <version>2.1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <!--
+      see : https://groups.google.com/forum/#!topic/littleproxy/TbKILjw7k-I 
+       -->
+      <version>20.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+      <!-- NOTE : To add original appender, we need logback-classic at compile time.
+      <scope>runtime</scope>
+       -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.16.14</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.6.1</version>
+        <configuration>
+          <source>${java.version.source}</source>
+          <target>${java.version.target}</target>
+          <encoding>${project.build.sourceEncoding}</encoding>
+          <debug>${java.compiler.debug}</debug>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>${exec.mainClass}</Main-Class>
+                    <X-Compile-Source-JDK>${java.version.source}</X-Compile-Source-JDK>
+                    <X-Compile-Target-JDK>${java.version.target}</X-Compile-Target-JDK>
+                    <Specification-Title>${project.name}</Specification-Title>
+                    <Specification-Version>${project.version}</Specification-Version>
+                    <!-- don't use
+                    <Jenkins-Build-Tag>${BUILD_TAG}</Jenkins-Build-Tag>
+                    <Jenkins-Build-Id>${BUILD_ID}</Jenkins-Build-Id>
+                    <Git-Commit>${GIT_COMMIT}</Git-Commit>
+                    <Git-Branch>${GIT_BRANCH}</Git-Branch>
+                     -->
+                  </manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
+              </transformers>
+              <filters>
+                <filter>
+                  <!-- NOTE : Bouncy Castle jar file contains META-INF/BCKEY.(DSA|SF) files, which cause
+                  'A JNI error has occurred, please check your installation and try again' +
+                  'Exception in thread "main" java.lang.SecurityException: Invalid signature file digest for Manifest main attributes'
+                  errors.
+                  -> filter-out these files, then works fine. (But is this good way in security perspective ... ?? )
+                  ref:
+                  https://stackoverflow.com/questions/22566191/exception-in-thread-main-java-lang-securityexception-invalid-signature-file-d
+                  https://stackoverflow.com/questions/30199035/how-can-i-tell-which-signed-jar-is-causing-maven-shade-plugin-to-fail
+                  https://stackoverflow.com/questions/999489/invalid-signature-file-when-attempting-to-run-a-jar
+                  https://stackoverflow.com/questions/43201230/create-dependency-folder-with-dependent-jars-with-maven-shade-plugin
+                  https://gist.github.com/leewin12/6505726
+                  # ooooooooops... lot of "SO" threads ... X(
+                  -->
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.6.0</version>
+      </plugin>
+
+    </plugins>
+  </build>
+
+</project>
