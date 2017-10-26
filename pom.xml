@@ -4,7 +4,7 @@
 
   <groupId>com.secureskytech</groupId>
   <artifactId>msgpack-json-proxy</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>msgpack-json-proxy</name>
