@@ -1,0 +1,2 @@
+# msgpack-json-proxy
+TTPリクエストボディ/レスポンスボディについて、MessagePack形式とJSON形式を相互変換するローカルHTTPプロキシ
