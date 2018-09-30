@@ -47,9 +47,9 @@ public class AppConfig {
         sb.append("## (comment out or set 'false' if you don't need it)\r\n");
         sb.append(KEY_J2M_ENABLE_RESCON + " = true\r\n");
         sb.append("## demo web server listening port (http)\r\n");
-        sb.append(KEY_DEMO_PORT_HTTP + " = localhost:8183\r\n");
+        sb.append(KEY_DEMO_PORT_HTTP + " = 8183\r\n");
         sb.append("## demo web server listening port (https)\r\n");
-        sb.append(KEY_DEMO_PORT_HTTP + " = localhost:8184\r\n");
+        sb.append(KEY_DEMO_PORT_HTTPS + " = 8184\r\n");
         sb.append("#----(end)----\r\n");
         return sb.toString();
     }
